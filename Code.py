@@ -10,7 +10,6 @@ s = serial.Serial('/dev/ttyACM0', 9600)
 s.reset_input_buffer()
 
 
-print("Waiting for Card")
 
 rootdir = '/home/linaro/RFID-Reader/'
 player = vlc.Instance()
@@ -40,29 +39,32 @@ def playVideo(video: str):
    time.sleep(1)
 
 def getSerialData():
-   res = s.readline().decode('utf-8').rstrip()
-   time.sleep(2)
-   
-   return res
+   return s.readline().decode('utf-8').rstrip()
 
 
 def main():
    videoString = None
-   while True:
-      # If the serial buffer is not empty, get the video ID, reset the buffer, and wait 4 seconds
-      if s.in_waiting > 0:
-         videoString = getVideo(getSerialData())
-         time.sleep(4)
-         s.reset_input_buffer()
+   print("Waiting for Card")
 
-      # If the video is not playing and the videoString is not None, play the video
-      if videoString == None and media.is_playing() == 0:
-         playVideo("IdleRick.mp4")
+   try:
+      while True:
+         # If the serial buffer is not empty, get the video ID, reset the buffer, and wait 4 seconds
+         if s.in_waiting > 0:
+            videoString = getVideo(getSerialData())
+            time.sleep(4)
+            s.reset_input_buffer()
 
-      # If the video is playing and the videoString is not None, stop the video and play the new video
-      if videoString != None and media.is_playing() == 1:
-         playVideo(videoString)
-         videoString = None
+         # If the video is not playing and the videoString is not None, play the video
+         if videoString == None and media.is_playing() == 0:
+            playVideo("IdleRick.mp4")
+
+         # If the video is playing and the videoString is not None, stop the video and play the new video
+         if videoString != None and media.is_playing() == 1:
+            playVideo(videoString)
+            videoString = None
+   except KeyboardInterrupt:
+      print("Exiting Program")
 
 if __name__ == "__main__":
    main()
+
